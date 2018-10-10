@@ -17,6 +17,10 @@
   },
   "author": "frodrigues21",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FRodrigues21/thesis-check"
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "npm": "^6.4.1",
