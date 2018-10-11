@@ -3,34 +3,41 @@
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const url = 'http://estagios.di.fct.unl.pt/public/professor/tese.php';
+const _ = require('lodash');
 
 rp(url)
   .then(function(html) {
-    //success!
     var thesis = [];
+
     var $ = cheerio.load(html);
     $('tr').each(function(i, elem) {
       if (i > 1) {
         var name = $('td[class=name_cell]', $(this).html()).text();
         var info = $('td[class=info_cell]', $(this).html()).text();
-        var date = info.substring(info.length - 10, info.length);
-        if (name) thesis.push({ name, date });
+        var date = info.substring(info.length - 10, info.length).split('-');
+        if (name)
+          thesis.push({ name, date: new Date(date[0], date[1] - 1, date[2]) });
       }
     });
+
+    // Sort thesis by date
     thesis.sort(function(a, b) {
-      var a_date = a.date.split('-');
-      var b_date = b.date.split('-');
-      return (
-        new Date(a_date[0], a_date[1], a_date[2]) -
-        new Date(b_date[0], b_date[1], b_date[2])
-      );
+      return a.date - b.date;
     });
-    thesis.forEach((v, i) => {
-      console.log('[' + i + '] (' + v.date + ') ' + v.name);
+
+    // Group thesis by date
+    thesis = _.groupBy(thesis, e => e.date);
+
+    // Print
+    var j = 1;
+    _.each(thesis, (i, e) => {
+      console.log('( %s )', e);
+      thesis[e].forEach(t => {
+        console.log('(%d) %s', j++, t.name);
+      });
+      console.log(' ');
     });
-    //console.log($('td[class=name_cell]').text());
-    //console.log($('td[class=info_cell]').text());
   })
   .catch(function(err) {
-    //handle error
+    console.log('An error occured. Please try again.');
   });
